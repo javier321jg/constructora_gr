@@ -5,6 +5,8 @@
 
 Página web moderna y profesional para empresa constructora con **animaciones 3D ultra avanzadas** y panel de administración completo.
 
+> **🪟 ¿Usas Windows?** Lee la [Guía de Instalación para Windows](INSTALACION_WINDOWS.md) para instrucciones específicas paso a paso.
+
 ## ✨ Características Principales
 
 ### Frontend
