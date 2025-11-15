@@ -19,13 +19,32 @@ def create_app():
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
 
     # Configuración de base de datos
-    database_url = os.getenv('DATABASE_URL', 'sqlite:///../database/constructora.db')
+    # Usar ruta absoluta para compatibilidad con Windows
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    project_root = os.path.dirname(basedir)
+    database_path = os.path.join(project_root, 'database', 'constructora.db')
+
+    # Crear carpeta de base de datos si no existe
+    database_dir = os.path.dirname(database_path)
+    if not os.path.exists(database_dir):
+        os.makedirs(database_dir)
+
+    database_url = os.getenv('DATABASE_URL', f'sqlite:///{database_path}')
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Configuración de uploads
-    app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', './uploads')
+    upload_folder = os.getenv('UPLOAD_FOLDER', './uploads')
+    app.config['UPLOAD_FOLDER'] = upload_folder
     app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 5242880))  # 5MB
+
+    # Crear carpeta de uploads si no existe
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)
+    for subfolder in ['projects', 'services', 'general']:
+        subfolder_path = os.path.join(upload_folder, subfolder)
+        if not os.path.exists(subfolder_path):
+            os.makedirs(subfolder_path)
 
     # Inicializar extensiones
     db.init_app(app)
