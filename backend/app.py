@@ -1,10 +1,19 @@
 import os
-from flask import Flask, jsonify
+import logging
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 from models import db
 from datetime import timedelta
+
+# Configurar logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
 
 # Cargar variables de entorno
 load_dotenv()
@@ -72,9 +81,32 @@ def create_app():
     db.init_app(app)
     jwt = JWTManager(app)
 
+    # Middleware para logging de requests
+    @app.before_request
+    def log_request_info():
+        logger.debug('=' * 80)
+        logger.debug(f'🔵 REQUEST: {request.method} {request.path}')
+        logger.debug(f'📍 URL completa: {request.url}')
+
+        # Loguear headers importantes
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            # Mostrar solo los primeros 50 caracteres del token para seguridad
+            token_preview = auth_header[:50] + '...' if len(auth_header) > 50 else auth_header
+            logger.debug(f'🔑 Authorization: {token_preview}')
+        else:
+            logger.debug('⚠️  NO Authorization header')
+
+        logger.debug(f'🌐 Origin: {request.headers.get("Origin", "N/A")}')
+        logger.debug(f'📦 Content-Type: {request.headers.get("Content-Type", "N/A")}')
+        logger.debug('=' * 80)
+
     # Configurar manejadores de errores JWT
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
+        logger.error(f'❌ JWT ERROR - Token expirado')
+        logger.error(f'   Header: {jwt_header}')
+        logger.error(f'   Payload: {jwt_payload}')
         return jsonify({
             'error': 'Token expirado',
             'message': 'El token de autenticación ha expirado'
@@ -82,6 +114,9 @@ def create_app():
 
     @jwt.invalid_token_loader
     def invalid_token_callback(error):
+        logger.error(f'❌ JWT ERROR - Token inválido')
+        logger.error(f'   Error: {error}')
+        logger.error(f'   Authorization header: {request.headers.get("Authorization", "N/A")}')
         return jsonify({
             'error': 'Token inválido',
             'message': 'El token de autenticación es inválido'
@@ -89,6 +124,9 @@ def create_app():
 
     @jwt.unauthorized_loader
     def missing_token_callback(error):
+        logger.error(f'❌ JWT ERROR - Token faltante')
+        logger.error(f'   Error: {error}')
+        logger.error(f'   Headers recibidos: {dict(request.headers)}')
         return jsonify({
             'error': 'Token faltante',
             'message': 'Se requiere un token de autenticación'
@@ -96,6 +134,9 @@ def create_app():
 
     @jwt.revoked_token_loader
     def revoked_token_callback(jwt_header, jwt_payload):
+        logger.error(f'❌ JWT ERROR - Token revocado')
+        logger.error(f'   Header: {jwt_header}')
+        logger.error(f'   Payload: {jwt_payload}')
         return jsonify({
             'error': 'Token revocado',
             'message': 'El token de autenticación ha sido revocado'
