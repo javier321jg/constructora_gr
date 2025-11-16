@@ -40,6 +40,7 @@ export const Dashboard = () => {
       color: 'from-blue-500 to-blue-600',
       description: 'Editar Hero, Nosotros, Estadísticas',
       comingSoon: false,
+      path: '/admin/hero',
     },
     {
       title: 'Servicios',
@@ -47,13 +48,15 @@ export const Dashboard = () => {
       color: 'from-purple-500 to-purple-600',
       description: 'Gestionar servicios ofrecidos',
       comingSoon: false,
+      path: '/admin/services',
     },
     {
       title: 'Proyectos',
       icon: Building,
       color: 'from-green-500 to-green-600',
       description: 'Administrar proyectos y galerías',
-      comingSoon: false,
+      comingSoon: true,
+      path: '',
     },
     {
       title: 'Mensajes',
@@ -61,6 +64,7 @@ export const Dashboard = () => {
       color: 'from-yellow-500 to-yellow-600',
       description: 'Ver mensajes de contacto',
       comingSoon: false,
+      path: '/admin/messages',
     },
     {
       title: 'Imágenes',
@@ -68,6 +72,7 @@ export const Dashboard = () => {
       color: 'from-pink-500 to-pink-600',
       description: 'Biblioteca de imágenes',
       comingSoon: true,
+      path: '',
     },
     {
       title: 'Configuración',
@@ -75,6 +80,7 @@ export const Dashboard = () => {
       color: 'from-gray-500 to-gray-600',
       description: 'Configuración del sitio',
       comingSoon: true,
+      path: '',
     },
   ];
 
@@ -189,6 +195,7 @@ export const Dashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
+                onClick={() => !section.comingSoon && section.path && navigate(section.path)}
                 className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 ${
                   section.comingSoon ? 'opacity-60' : 'cursor-pointer hover:-translate-y-2'
                 }`}

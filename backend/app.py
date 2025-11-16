@@ -38,12 +38,12 @@ def create_app():
     # Configuración de uploads
     upload_folder = os.getenv('UPLOAD_FOLDER', './uploads')
     app.config['UPLOAD_FOLDER'] = upload_folder
-    app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 5242880))  # 5MB
+    app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 52428800))  # 50MB para videos
 
     # Crear carpeta de uploads si no existe
     if not os.path.exists(upload_folder):
         os.makedirs(upload_folder)
-    for subfolder in ['projects', 'services', 'general']:
+    for subfolder in ['projects', 'services', 'general', 'videos', 'models']:
         subfolder_path = os.path.join(upload_folder, subfolder)
         if not os.path.exists(subfolder_path):
             os.makedirs(subfolder_path)
@@ -161,4 +161,5 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Configuración para producción - debug desactivado
+    app.run(debug=False, host='0.0.0.0', port=5000)

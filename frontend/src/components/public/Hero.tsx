@@ -34,14 +34,34 @@ export const Hero = () => {
 
   return (
     <section className="relative h-screen overflow-hidden">
-      {/* Background 3D Scene */}
+      {/* Background - Video, Image, or 3D Scene */}
       <div className="absolute inset-0 z-0">
-        <ConstructionScene
-          enableControls={false}
-          particleCount={800}
-          particleColor="#FF6B35"
-          particleSpeed={1}
-        />
+        {content?.background_video ? (
+          // Video de fondo
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+            src={`http://localhost:5000${content.background_video}`}
+          />
+        ) : content?.background_image ? (
+          // Imagen de fondo
+          <img
+            src={`http://localhost:5000${content.background_image}`}
+            alt="Background"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          // Escena 3D por defecto
+          <ConstructionScene
+            enableControls={false}
+            particleCount={800}
+            particleColor="#FF6B35"
+            particleSpeed={1}
+          />
+        )}
       </div>
 
       {/* Overlay oscuro */}

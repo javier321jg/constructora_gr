@@ -103,7 +103,12 @@ export const contactApi = {
 };
 
 // ============= IMAGES =============
-export const imagesApi = {
+export const imageApi = {
+  uploadImage: (formData: FormData) =>
+    api.post('/images/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
   upload: (file: File, folder = 'general') => {
     const formData = new FormData();
     formData.append('file', file);
@@ -126,5 +131,8 @@ export const imagesApi = {
 
   list: (folder: string) => api.get(`/images/list/${folder}`),
 };
+
+// Legacy alias
+export const imagesApi = imageApi;
 
 export default api;

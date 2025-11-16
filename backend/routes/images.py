@@ -7,7 +7,7 @@ import uuid
 
 images_bp = Blueprint('images', __name__)
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'mp4', 'webm', 'mov', 'glb', 'gltf', 'obj', 'fbx'}
 UPLOAD_FOLDER = './uploads'
 
 def allowed_file(filename):
