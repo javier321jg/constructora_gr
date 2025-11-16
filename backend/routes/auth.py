@@ -18,8 +18,9 @@ def login():
         if not user or not user.check_password(data['password']):
             return jsonify({'error': 'Credenciales inválidas'}), 401
 
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        # JWT requiere que identity sea string
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
 
         return jsonify({
             'message': 'Login exitoso',
@@ -38,7 +39,8 @@ def refresh():
     """Renovar access token usando refresh token"""
     try:
         current_user_id = get_jwt_identity()
-        new_access_token = create_access_token(identity=current_user_id)
+        # Asegurar que sea string
+        new_access_token = create_access_token(identity=str(current_user_id))
 
         return jsonify({
             'access_token': new_access_token
@@ -60,7 +62,8 @@ def get_current_user():
             print(f"[AUTH /me] ERROR: No se pudo obtener el user_id del token")
             return jsonify({'error': 'Token inválido'}), 401
 
-        user = User.query.get(current_user_id)
+        # Convertir de string a int para buscar en la BD
+        user = User.query.get(int(current_user_id))
         print(f"[AUTH /me] Usuario encontrado: {user.email if user else 'None'}")
 
         if not user:
@@ -86,7 +89,8 @@ def change_password():
         if not data.get('current_password') or not data.get('new_password'):
             return jsonify({'error': 'Contraseña actual y nueva contraseña son requeridas'}), 400
 
-        user = User.query.get(current_user_id)
+        # Convertir de string a int
+        user = User.query.get(int(current_user_id))
 
         if not user.check_password(data['current_password']):
             return jsonify({'error': 'Contraseña actual incorrecta'}), 401
