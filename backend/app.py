@@ -52,6 +52,27 @@ def create_app():
     db.init_app(app)
     jwt = JWTManager(app)
 
+    # Manejadores de errores JWT
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        print(f"JWT Error - Token inválido: {error}")
+        return jsonify({'error': 'Token inválido', 'message': str(error)}), 401
+
+    @jwt.unauthorized_loader
+    def missing_token_callback(error):
+        print(f"JWT Error - Token no proporcionado: {error}")
+        return jsonify({'error': 'Token no proporcionado', 'message': str(error)}), 401
+
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        print(f"JWT Error - Token expirado")
+        return jsonify({'error': 'Token expirado', 'message': 'El token ha expirado'}), 401
+
+    @jwt.revoked_token_loader
+    def revoked_token_callback(jwt_header, jwt_payload):
+        print(f"JWT Error - Token revocado")
+        return jsonify({'error': 'Token revocado', 'message': 'El token ha sido revocado'}), 401
+
     # Configurar CORS
     CORS(app, resources={
         r"/api/*": {
@@ -161,5 +182,9 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    # Configuración para producción - debug desactivado
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    # Debug habilitado temporalmente para diagnóstico
+    print("\n" + "="*50)
+    print("🚀 Servidor iniciado en http://localhost:5000")
+    print("📊 Estado de APIs disponible en /api/health")
+    print("="*50 + "\n")
+    app.run(debug=True, host='0.0.0.0', port=5000)

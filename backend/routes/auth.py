@@ -54,7 +54,14 @@ def get_current_user():
     """Obtener información del usuario actual"""
     try:
         current_user_id = get_jwt_identity()
+        print(f"[AUTH /me] User ID del token: {current_user_id}")
+
+        if not current_user_id:
+            print(f"[AUTH /me] ERROR: No se pudo obtener el user_id del token")
+            return jsonify({'error': 'Token inválido'}), 401
+
         user = User.query.get(current_user_id)
+        print(f"[AUTH /me] Usuario encontrado: {user.email if user else 'None'}")
 
         if not user:
             return jsonify({'error': 'Usuario no encontrado'}), 404
@@ -62,6 +69,9 @@ def get_current_user():
         return jsonify(user.to_dict()), 200
 
     except Exception as e:
+        print(f"[AUTH /me] ERROR: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 
