@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Home, Briefcase, Building, Users, Mail } from 'lucide-react';
 
@@ -88,12 +89,12 @@ export const Navbar = () => {
                 {item.name}
               </a>
             ))}
-            <a
-              href="/admin/login"
+            <Link
+              to="/admin/login"
               className="btn-primary text-sm px-6 py-2"
             >
               Admin
-            </a>
+            </Link>
           </motion.div>
 
           {/* Mobile Menu Button */}
@@ -132,12 +133,13 @@ export const Navbar = () => {
                     </a>
                   );
                 })}
-                <a
-                  href="/admin/login"
+                <Link
+                  to="/admin/login"
                   className="block text-center btn-primary mt-4"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Admin
-                </a>
+                </Link>
               </div>
             </motion.div>
           )}
