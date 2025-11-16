@@ -29,7 +29,9 @@ def create_app():
     if not os.path.exists(database_dir):
         os.makedirs(database_dir)
 
-    database_url = os.getenv('DATABASE_URL', f'sqlite:///{database_path}')
+    # Convertir ruta a formato URI para SQLite (usar / en lugar de \)
+    database_uri_path = database_path.replace('\\', '/')
+    database_url = os.getenv('DATABASE_URL', f'sqlite:///{database_uri_path}')
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
