@@ -72,12 +72,43 @@ def create_app():
     db.init_app(app)
     jwt = JWTManager(app)
 
+    # Configurar manejadores de errores JWT
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return jsonify({
+            'error': 'Token expirado',
+            'message': 'El token de autenticación ha expirado'
+        }), 401
+
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        return jsonify({
+            'error': 'Token inválido',
+            'message': 'El token de autenticación es inválido'
+        }), 401
+
+    @jwt.unauthorized_loader
+    def missing_token_callback(error):
+        return jsonify({
+            'error': 'Token faltante',
+            'message': 'Se requiere un token de autenticación'
+        }), 401
+
+    @jwt.revoked_token_loader
+    def revoked_token_callback(jwt_header, jwt_payload):
+        return jsonify({
+            'error': 'Token revocado',
+            'message': 'El token de autenticación ha sido revocado'
+        }), 401
+
     # Configurar CORS
     CORS(app, resources={
         r"/api/*": {
             "origins": [os.getenv('FRONTEND_URL', 'http://localhost:5173')],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"]
+            "allow_headers": ["Content-Type", "Authorization"],
+            "expose_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
         }
     })
 
