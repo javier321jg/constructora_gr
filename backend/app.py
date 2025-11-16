@@ -19,34 +19,54 @@ def create_app():
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
 
     # Configuración de base de datos
-    # Usar ruta absoluta para compatibilidad con Windows
+    # IMPORTANTE: Siempre usar rutas absolutas para compatibilidad con Windows
     basedir = os.path.abspath(os.path.dirname(__file__))
     project_root = os.path.dirname(basedir)
+
+    # Construir ruta absoluta para la base de datos
     database_path = os.path.join(project_root, 'database', 'constructora.db')
+    database_dir = os.path.dirname(database_path)
 
     # Crear carpeta de base de datos si no existe
-    database_dir = os.path.dirname(database_path)
     if not os.path.exists(database_dir):
-        os.makedirs(database_dir)
+        os.makedirs(database_dir, exist_ok=True)
+        print(f"✓ Directorio de base de datos creado: {database_dir}")
 
     # Convertir ruta a formato URI para SQLite (usar / en lugar de \)
+    # En Windows: C:\path\to\db.db -> sqlite:///C:/path/to/db.db
     database_uri_path = database_path.replace('\\', '/')
-    database_url = os.getenv('DATABASE_URL', f'sqlite:///{database_uri_path}')
+
+    # FORZAR uso de ruta absoluta (ignorar DATABASE_URL del .env si es relativa)
+    database_url = f'sqlite:///{database_uri_path}'
+
+    print(f"📍 Ruta de base de datos: {database_path}")
+    print(f"📍 URI de base de datos: {database_url}")
+
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Configuración de uploads
-    upload_folder = os.getenv('UPLOAD_FOLDER', './uploads')
+    # Configuración de uploads - usar ruta absoluta
+    upload_folder_from_env = os.getenv('UPLOAD_FOLDER', 'uploads')
+
+    # Si la ruta del .env es relativa, convertirla a absoluta
+    if not os.path.isabs(upload_folder_from_env):
+        upload_folder = os.path.join(basedir, upload_folder_from_env)
+    else:
+        upload_folder = upload_folder_from_env
+
+    upload_folder = os.path.abspath(upload_folder)
     app.config['UPLOAD_FOLDER'] = upload_folder
     app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 5242880))  # 5MB
 
     # Crear carpeta de uploads si no existe
     if not os.path.exists(upload_folder):
-        os.makedirs(upload_folder)
+        os.makedirs(upload_folder, exist_ok=True)
+        print(f"✓ Directorio de uploads creado: {upload_folder}")
+
     for subfolder in ['projects', 'services', 'general']:
         subfolder_path = os.path.join(upload_folder, subfolder)
         if not os.path.exists(subfolder_path):
-            os.makedirs(subfolder_path)
+            os.makedirs(subfolder_path, exist_ok=True)
 
     # Inicializar extensiones
     db.init_app(app)
