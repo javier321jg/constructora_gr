@@ -18,14 +18,20 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: async (email: string, password: string) => {
     try {
+      console.log('🔐 Intentando login con:', email);
       const response = await authApi.login(email, password);
+      console.log('✅ Login response:', response.data);
       const { access_token, refresh_token, user } = response.data;
 
+      console.log('💾 Guardando tokens en localStorage...');
       localStorage.setItem('access_token', access_token);
       localStorage.setItem('refresh_token', refresh_token);
+      console.log('✅ Tokens guardados');
 
       set({ user, isAuthenticated: true, isLoading: false });
+      console.log('✅ Estado actualizado - usuario autenticado:', user);
     } catch (error) {
+      console.error('❌ Error en login:', error);
       set({ user: null, isAuthenticated: false, isLoading: false });
       throw error;
     }
@@ -38,17 +44,23 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   checkAuth: async () => {
+    console.log('🔍 Verificando autenticación...');
     const token = localStorage.getItem('access_token');
+    console.log('🔑 Token encontrado:', token ? token.substring(0, 30) + '...' : 'NO HAY TOKEN');
 
     if (!token) {
+      console.log('⚠️ No hay token - usuario no autenticado');
       set({ user: null, isAuthenticated: false, isLoading: false });
       return;
     }
 
     try {
+      console.log('📡 Llamando a /api/auth/me...');
       const response = await authApi.getCurrentUser();
+      console.log('✅ Usuario verificado:', response.data);
       set({ user: response.data, isAuthenticated: true, isLoading: false });
     } catch (error) {
+      console.error('❌ Error verificando usuario:', error);
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       set({ user: null, isAuthenticated: false, isLoading: false });
