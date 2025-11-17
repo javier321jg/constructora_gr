@@ -16,10 +16,12 @@ export const Projects = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
+        console.log('🔍 Cargando proyectos desde API...');
         const response = await contentApi.getProjects();
+        console.log('✅ Proyectos recibidos:', response.data);
         setProjects(response.data);
       } catch (error) {
-        console.error('Error loading projects:', error);
+        console.error('❌ Error loading projects:', error);
       } finally {
         setLoading(false);
       }

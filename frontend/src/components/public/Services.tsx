@@ -22,10 +22,12 @@ export const Services = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
+        console.log('🔍 Cargando servicios desde API...');
         const response = await contentApi.getServices(false);
+        console.log('✅ Servicios recibidos:', response.data);
         setServices(response.data);
       } catch (error) {
-        console.error('Error loading services:', error);
+        console.error('❌ Error loading services:', error);
       } finally {
         setLoading(false);
       }
@@ -69,6 +71,8 @@ export const Services = () => {
   ];
 
   const displayServices = services.length > 0 ? services : defaultServices;
+
+  console.log('📊 Servicios a mostrar:', displayServices.length, displayServices);
 
   if (loading) {
     return (

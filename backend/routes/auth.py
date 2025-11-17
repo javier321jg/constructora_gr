@@ -70,15 +70,19 @@ def refresh():
 
 
 @auth_bp.route('/me', methods=['GET'])
-@jwt_required()
+@jwt_required(optional=True)
 def get_current_user():
     """Obtener información del usuario actual"""
     try:
         print("\n========== /ME REQUEST ==========")
-        print(f"🔐 Headers: {dict(request.headers)}")
+        print(f"🔐 Headers Authorization: {request.headers.get('Authorization', 'NO AUTH HEADER')}")
 
         current_user_id = get_jwt_identity()
         print(f"🆔 User ID del token: {current_user_id}")
+
+        if not current_user_id:
+            print("⚠️ No hay token - usuario no autenticado")
+            return jsonify({'error': 'No autenticado'}), 401
 
         user = User.query.get(current_user_id)
 
