@@ -72,6 +72,8 @@ def upload_image():
         file_path = os.path.join(upload_path, unique_filename)
         file.save(file_path)
 
+        print(f"📁 [UPLOAD] Archivo guardado en: {os.path.abspath(file_path)}")
+
         # Optimizar imagen
         optimize_image(file_path)
 
@@ -143,9 +145,19 @@ def serve_image(folder, filename):
     """Servir una imagen"""
     try:
         upload_path = os.path.join(UPLOAD_FOLDER, folder)
+        file_path = os.path.join(upload_path, filename)
+
+        print(f"🔍 [SERVE] Buscando archivo en: {os.path.abspath(file_path)}")
+        print(f"🔍 [SERVE] Existe: {os.path.exists(file_path)}")
+
+        if not os.path.exists(file_path):
+            print(f"❌ [SERVE] Archivo NO encontrado: {file_path}")
+            return jsonify({'error': 'Imagen no encontrada', 'path': file_path}), 404
+
         return send_from_directory(upload_path, filename)
     except Exception as e:
-        return jsonify({'error': 'Imagen no encontrada'}), 404
+        print(f"❌ [SERVE] Error: {str(e)}")
+        return jsonify({'error': 'Imagen no encontrada', 'message': str(e)}), 404
 
 
 @images_bp.route('/delete', methods=['DELETE'])
