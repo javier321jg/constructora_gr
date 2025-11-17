@@ -32,8 +32,9 @@ def login():
         print("✅ Contraseña correcta")
         print("🔐 Generando tokens...")
 
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        # IMPORTANTE: identity debe ser STRING
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
 
         print(f"✅ Access token generado: {access_token[:50]}...")
         print(f"✅ Refresh token generado: {refresh_token[:50]}...")
@@ -59,6 +60,7 @@ def refresh():
     """Renovar access token usando refresh token"""
     try:
         current_user_id = get_jwt_identity()
+        # El identity ya es string, mantenerlo así
         new_access_token = create_access_token(identity=current_user_id)
 
         return jsonify({
@@ -88,7 +90,10 @@ def get_current_user():
             from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
             verify_jwt_in_request(optional=True)
             current_user_id = get_jwt_identity()
-            print(f"🆔 User ID del token: {current_user_id}")
+            print(f"🆔 User ID del token (string): {current_user_id}")
+            # Convertir a int para buscar en la BD
+            current_user_id = int(current_user_id) if current_user_id else None
+            print(f"🆔 User ID convertido a int: {current_user_id}")
         except Exception as jwt_error:
             print(f"❌ Error verificando JWT: {str(jwt_error)}")
             return jsonify({'error': 'Token inválido', 'details': str(jwt_error)}), 401
@@ -119,7 +124,7 @@ def get_current_user():
 def change_password():
     """Cambiar contraseña del usuario actual"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         data = request.get_json()
 
         if not data.get('current_password') or not data.get('new_password'):
