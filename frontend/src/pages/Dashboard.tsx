@@ -55,8 +55,8 @@ export const Dashboard = () => {
       icon: Building,
       color: 'from-green-500 to-green-600',
       description: 'Administrar proyectos y galerías',
-      comingSoon: true,
-      path: '',
+      comingSoon: false,
+      path: '/admin/projects',
     },
     {
       title: 'Mensajes',

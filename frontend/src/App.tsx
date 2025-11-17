@@ -4,6 +4,7 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { AdminHero } from './pages/AdminHero';
 import { AdminServices } from './pages/AdminServices';
+import { AdminProjects } from './pages/AdminProjects';
 import { AdminMessages } from './pages/AdminMessages';
 import { useAuthStore } from './context/useAuthStore';
 
@@ -48,6 +49,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminServices />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/projects"
+          element={
+            <ProtectedRoute>
+              <AdminProjects />
             </ProtectedRoute>
           }
         />
