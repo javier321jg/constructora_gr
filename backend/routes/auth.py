@@ -8,18 +8,36 @@ auth_bp = Blueprint('auth', __name__)
 def login():
     """Endpoint de login para administradores"""
     try:
+        print("\n========== LOGIN REQUEST ==========")
         data = request.get_json()
+        print(f"📥 Datos recibidos: {data}")
 
         if not data or not data.get('email') or not data.get('password'):
+            print("❌ Error: Faltan email o contraseña")
             return jsonify({'error': 'Email y contraseña son requeridos'}), 400
 
+        print(f"🔍 Buscando usuario con email: {data['email']}")
         user = User.query.filter_by(email=data['email']).first()
 
-        if not user or not user.check_password(data['password']):
+        if not user:
+            print("❌ Error: Usuario no encontrado")
             return jsonify({'error': 'Credenciales inválidas'}), 401
+
+        print(f"✅ Usuario encontrado: {user.email}")
+
+        if not user.check_password(data['password']):
+            print("❌ Error: Contraseña incorrecta")
+            return jsonify({'error': 'Credenciales inválidas'}), 401
+
+        print("✅ Contraseña correcta")
+        print("🔐 Generando tokens...")
 
         access_token = create_access_token(identity=user.id)
         refresh_token = create_refresh_token(identity=user.id)
+
+        print(f"✅ Access token generado: {access_token[:50]}...")
+        print(f"✅ Refresh token generado: {refresh_token[:50]}...")
+        print("========== LOGIN EXITOSO ==========\n")
 
         return jsonify({
             'message': 'Login exitoso',
@@ -29,6 +47,9 @@ def login():
         }), 200
 
     except Exception as e:
+        print(f"❌❌❌ ERROR EN LOGIN: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 
@@ -53,15 +74,26 @@ def refresh():
 def get_current_user():
     """Obtener información del usuario actual"""
     try:
+        print("\n========== /ME REQUEST ==========")
+        print(f"🔐 Headers: {dict(request.headers)}")
+
         current_user_id = get_jwt_identity()
+        print(f"🆔 User ID del token: {current_user_id}")
+
         user = User.query.get(current_user_id)
 
         if not user:
+            print(f"❌ Usuario con ID {current_user_id} no encontrado en BD")
             return jsonify({'error': 'Usuario no encontrado'}), 404
 
+        print(f"✅ Usuario encontrado: {user.email}")
+        print("========== /ME EXITOSO ==========\n")
         return jsonify(user.to_dict()), 200
 
     except Exception as e:
+        print(f"❌❌❌ ERROR EN /ME: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 
