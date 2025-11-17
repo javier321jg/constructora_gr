@@ -8,7 +8,13 @@ import uuid
 images_bp = Blueprint('images', __name__)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'mp4', 'webm', 'mov', 'glb', 'gltf', 'obj', 'fbx'}
-UPLOAD_FOLDER = './uploads'
+
+# Usar ruta absoluta basada en la ubicación de este archivo
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+BACKEND_DIR = os.path.dirname(CURRENT_DIR)
+UPLOAD_FOLDER = os.path.join(BACKEND_DIR, 'uploads')
+
+print(f"📁 [INIT] Carpeta de uploads configurada en: {UPLOAD_FOLDER}")
 
 def allowed_file(filename):
     """Verificar si el archivo tiene una extensión permitida"""
@@ -147,16 +153,21 @@ def serve_image(folder, filename):
         upload_path = os.path.join(UPLOAD_FOLDER, folder)
         file_path = os.path.join(upload_path, filename)
 
-        print(f"🔍 [SERVE] Buscando archivo en: {os.path.abspath(file_path)}")
+        print(f"🔍 [SERVE] UPLOAD_FOLDER: {UPLOAD_FOLDER}")
+        print(f"🔍 [SERVE] upload_path: {upload_path}")
+        print(f"🔍 [SERVE] Buscando archivo en: {file_path}")
         print(f"🔍 [SERVE] Existe: {os.path.exists(file_path)}")
 
         if not os.path.exists(file_path):
-            print(f"❌ [SERVE] Archivo NO encontrado: {file_path}")
+            print(f"❌ [SERVE] Archivo NO encontrado")
             return jsonify({'error': 'Imagen no encontrada', 'path': file_path}), 404
 
-        return send_from_directory(upload_path, filename)
+        print(f"✅ [SERVE] Sirviendo archivo desde: {upload_path} / {filename}")
+        return send_from_directory(os.path.abspath(upload_path), filename)
     except Exception as e:
         print(f"❌ [SERVE] Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': 'Imagen no encontrada', 'message': str(e)}), 404
 
 
