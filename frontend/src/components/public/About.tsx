@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, useInView, useMotionValue, useSpring } from 'framer-motion';
-import { Target, Eye, Award, Users } from 'lucide-react';
+import { Target, Eye, Award } from 'lucide-react';
 import { useScrollAnimation } from '../../hooks/useScrollAnimation';
 import { contentApi } from '../../services/api';
 import { AboutContent, Statistics } from '../../types';
