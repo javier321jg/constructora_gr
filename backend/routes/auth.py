@@ -70,18 +70,31 @@ def refresh():
 
 
 @auth_bp.route('/me', methods=['GET'])
-@jwt_required(optional=True)
 def get_current_user():
     """Obtener información del usuario actual"""
     try:
         print("\n========== /ME REQUEST ==========")
-        print(f"🔐 Headers Authorization: {request.headers.get('Authorization', 'NO AUTH HEADER')}")
+        print(f"🔐 Headers completos: {dict(request.headers)}")
 
-        current_user_id = get_jwt_identity()
-        print(f"🆔 User ID del token: {current_user_id}")
+        auth_header = request.headers.get('Authorization', None)
+        print(f"🔐 Authorization header: {auth_header}")
+
+        if not auth_header:
+            print("⚠️ No hay Authorization header - usuario no autenticado")
+            return jsonify({'error': 'No autenticado'}), 401
+
+        try:
+            # Verificar JWT manualmente
+            from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+            verify_jwt_in_request(optional=True)
+            current_user_id = get_jwt_identity()
+            print(f"🆔 User ID del token: {current_user_id}")
+        except Exception as jwt_error:
+            print(f"❌ Error verificando JWT: {str(jwt_error)}")
+            return jsonify({'error': 'Token inválido', 'details': str(jwt_error)}), 401
 
         if not current_user_id:
-            print("⚠️ No hay token - usuario no autenticado")
+            print("⚠️ Token válido pero sin user_id")
             return jsonify({'error': 'No autenticado'}), 401
 
         user = User.query.get(current_user_id)
@@ -98,7 +111,7 @@ def get_current_user():
         print(f"❌❌❌ ERROR EN /ME: {str(e)}")
         import traceback
         traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'type': type(e).__name__}), 500
 
 
 @auth_bp.route('/change-password', methods=['PUT'])
