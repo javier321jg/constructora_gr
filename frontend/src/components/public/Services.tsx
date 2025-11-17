@@ -142,37 +142,58 @@ export const Services = () => {
                   className="card h-full relative overflow-hidden cursor-pointer"
                   style={{ borderTop: `4px solid ${service.color}` }}
                 >
+                  {/* Imagen de fondo si existe */}
+                  {service.image && (
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500">
+                      <img
+                        src={`http://localhost:5000${service.image}`}
+                        alt={service.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
                   {/* Fondo animado */}
                   <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300"
                     style={{ background: service.color }}
                   />
 
-                  {/* Icono con animación 3D */}
-                  <div className="mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                    <div
-                      className="w-16 h-16 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: `${service.color}20` }}
-                    >
-                      <Icon
-                        size={32}
-                        style={{ color: service.color }}
-                        className="transform group-hover:rotate-12 transition-transform duration-300"
-                      />
-                    </div>
+                  {/* Icono con animación 3D o Imagen */}
+                  <div className="mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 relative z-10">
+                    {service.image ? (
+                      <div className="w-20 h-20 rounded-lg overflow-hidden shadow-lg">
+                        <img
+                          src={`http://localhost:5000${service.image}`}
+                          alt={service.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className="w-16 h-16 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: `${service.color}20` }}
+                      >
+                        <Icon
+                          size={32}
+                          style={{ color: service.color }}
+                          className="transform group-hover:rotate-12 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Contenido */}
-                  <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+                  <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors relative z-10">
                     {service.name}
                   </h3>
 
-                  <p className="text-gray-600 mb-4 line-clamp-3">
+                  <p className="text-gray-600 mb-4 line-clamp-3 relative z-10">
                     {service.short_description}
                   </p>
 
                   {/* Botón hover */}
-                  <div className="mt-auto pt-4 border-t border-gray-200 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                  <div className="mt-auto pt-4 border-t border-gray-200 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 relative z-10">
                     <span className="text-primary font-semibold flex items-center">
                       Ver más
                       <svg

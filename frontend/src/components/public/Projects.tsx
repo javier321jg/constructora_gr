@@ -129,7 +129,7 @@ export const Projects = () => {
                   <div className="absolute inset-0">
                     {project.main_image ? (
                       <img
-                        src={project.main_image}
+                        src={`http://localhost:5000${project.main_image}`}
                         alt={project.name}
                         className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                       />
@@ -212,7 +212,7 @@ export const Projects = () => {
                 <div className="relative h-64 md:h-96">
                   {selectedProject.main_image ? (
                     <img
-                      src={selectedProject.main_image}
+                      src={`http://localhost:5000${selectedProject.main_image}`}
                       alt={selectedProject.name}
                       className="w-full h-full object-cover"
                     />
@@ -274,15 +274,18 @@ export const Projects = () => {
 
                   {/* Galería de imágenes */}
                   {selectedProject.images && selectedProject.images.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {selectedProject.images.map((image) => (
-                        <img
-                          key={image.id}
-                          src={image.image_url}
-                          alt={image.caption || selectedProject.name}
-                          className="w-full h-40 object-cover rounded-lg hover:scale-105 transition-transform duration-300"
-                        />
-                      ))}
+                    <div>
+                      <h3 className="text-xl font-bold mb-4">Galería del Proyecto</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {selectedProject.images.map((image) => (
+                          <img
+                            key={image.id}
+                            src={`http://localhost:5000${image.image_url}`}
+                            alt={image.caption || selectedProject.name}
+                            className="w-full h-40 object-cover rounded-lg hover:scale-105 transition-transform duration-300 cursor-pointer"
+                          />
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
