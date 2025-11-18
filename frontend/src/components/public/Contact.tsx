@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, CheckCircle, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle, Facebook, Instagram, Linkedin, MapPinIcon, Clock } from 'lucide-react';
 import { useScrollAnimation } from '../../hooks/useScrollAnimation';
-import { contactApi } from '../../services/api';
+import { useContactInfo, useSendMessage } from '../../hooks/useApiQueries';
 import { ContactInfo } from '../../types';
 
 export const Contact = () => {
   const { ref, isVisible } = useScrollAnimation(0.2);
-  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: contactInfo, isLoading } = useContactInfo();
+  const sendMessageMutation = useSendMessage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,31 +16,15 @@ export const Contact = () => {
     subject: '',
     message: '',
   });
-  const [formStatus, setFormStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-
-  useEffect(() => {
-    const fetchContactInfo = async () => {
-      try {
-        const response = await contactApi.getInfo();
-        setContactInfo(response.data);
-      } catch (error) {
-        console.error('Error loading contact info:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchContactInfo();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormStatus('loading');
     setErrorMessage('');
 
     try {
-      await contactApi.sendMessage(formData);
+      await sendMessageMutation.mutateAsync(formData);
       setFormStatus('success');
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
 
@@ -60,30 +44,42 @@ export const Contact = () => {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <section id="contacto" className="section-padding bg-white">
-        <div className="container-custom">
-          <div className="shimmer h-96 rounded-xl" />
+      <section className="section-padding bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="shimmer h-96 rounded-2xl" />
         </div>
       </section>
     );
   }
 
   return (
-    <section id="contacto" className="section-padding bg-white" ref={ref}>
-      <div className="container-custom">
+    <section className="section-padding bg-white relative overflow-hidden" ref={ref}>
+      {/* Decorative elements */}
+      <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -30 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <h2 className="section-title">
-            Contáctanos
+          <motion.div
+            className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-6"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+            transition={{ delay: 0.1 }}
+          >
+            <span className="text-primary font-semibold text-sm">Ponte en Contacto</span>
+          </motion.div>
+
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-dark">
+            Contáctanos <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Hoy</span>
           </h2>
-          <p className="section-subtitle">
-            Estamos listos para ayudarte con tu próximo proyecto
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Estamos listos para ayudarte con tu próximo proyecto de construcción
           </p>
         </motion.div>
 
@@ -281,10 +277,10 @@ export const Contact = () => {
 
                 <button
                   type="submit"
-                  disabled={formStatus === 'loading'}
+                  disabled={sendMessageMutation.isPending}
                   className="btn-primary w-full md:w-auto flex items-center justify-center space-x-2"
                 >
-                  {formStatus === 'loading' ? (
+                  {sendMessageMutation.isPending ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       <span>Enviando...</span>

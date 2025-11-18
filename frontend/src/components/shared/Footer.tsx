@@ -1,28 +1,10 @@
-import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Building, Mail, Phone, MapPin, Facebook, Instagram, Linkedin, ArrowUp } from 'lucide-react';
-import { contactApi, contentApi } from '../../services/api';
-import { ContactInfo, SiteConfig } from '../../types';
+import { useContactInfo, useSiteConfig } from '../../hooks/useApiQueries';
 
 export const Footer = () => {
-  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
-  const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [contactResponse, configResponse] = await Promise.all([
-          contactApi.getInfo(),
-          contentApi.getConfig(),
-        ]);
-        setContactInfo(contactResponse.data);
-        setSiteConfig(configResponse.data);
-      } catch (error) {
-        console.error('Error loading footer data:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const { data: contactInfo } = useContactInfo();
+  const { data: siteConfig } = useSiteConfig();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -30,12 +12,41 @@ export const Footer = () => {
 
   const currentYear = new Date().getFullYear();
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6 },
+    },
+  };
+
   return (
-    <footer className="bg-dark text-white pt-16 pb-8">
-      <div className="container-custom">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+    <footer className="bg-dark text-white pt-20 pb-8 relative overflow-hidden">
+      {/* Decorative background */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
           {/* Columna 1: Logo y descripción */}
-          <div>
+          <motion.div variants={itemVariants}>
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
                 <Building className="text-white" size={24} />
@@ -50,27 +61,33 @@ export const Footer = () => {
             <p className="text-gray-400 text-sm">
               {siteConfig?.meta_description || 'Empresa constructora líder en proyectos de calidad.'}
             </p>
-          </div>
+          </motion.div>
 
           {/* Columna 2: Enlaces rápidos */}
-          <div>
+          <motion.div variants={itemVariants}>
             <h3 className="text-xl font-bold mb-4">Enlaces Rápidos</h3>
             <ul className="space-y-2">
-              {['Inicio', 'Servicios', 'Proyectos', 'Nosotros', 'Contacto'].map((item) => (
-                <li key={item}>
+              {[
+                { id: 'home', label: 'Inicio' },
+                { id: 'services', label: 'Servicios' },
+                { id: 'projects', label: 'Proyectos' },
+                { id: 'about', label: 'Nosotros' },
+                { id: 'contact', label: 'Contacto' },
+              ].map((item) => (
+                <li key={item.id}>
                   <a
-                    href={`#${item.toLowerCase()}`}
+                    href={`#${item.id}`}
                     className="text-gray-400 hover:text-primary transition-colors"
                   >
-                    {item}
+                    {item.label}
                   </a>
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Columna 3: Contacto */}
-          <div>
+          <motion.div variants={itemVariants}>
             <h3 className="text-xl font-bold mb-4">Contacto</h3>
             <ul className="space-y-3">
               {contactInfo?.address && (
@@ -102,10 +119,10 @@ export const Footer = () => {
                 </li>
               )}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Columna 4: Redes sociales */}
-          <div>
+          <motion.div variants={itemVariants}>
             <h3 className="text-xl font-bold mb-4">Síguenos</h3>
             <div className="flex space-x-4">
               {contactInfo?.facebook_url && (
@@ -145,11 +162,17 @@ export const Footer = () => {
                 {contactInfo?.schedule || 'Lunes a Viernes: 9:00 - 18:00'}
               </p>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        {/* Línea divisoria */}
-        <div className="border-t border-gray-700 pt-8">
+        {/* Footer bottom */}
+        <motion.div
+          className="border-t border-gray-700 pt-8"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          viewport={{ once: true }}
+        >
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm mb-4 md:mb-0">
               {siteConfig?.footer_copyright || `© ${currentYear} Constructora GR. Todos los derechos reservados.`}
@@ -164,7 +187,7 @@ export const Footer = () => {
               <ArrowUp size={20} />
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </footer>
   );
