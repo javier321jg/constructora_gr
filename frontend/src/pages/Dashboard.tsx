@@ -18,6 +18,10 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout, checkAuth } = useAuthStore();
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+  };
+
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -39,6 +43,7 @@ export const Dashboard = () => {
       icon: FileText,
       color: 'from-blue-500 to-blue-600',
       description: 'Editar Hero, Nosotros, Estadísticas',
+      path: '/admin/content',
       comingSoon: false,
     },
     {
@@ -46,6 +51,7 @@ export const Dashboard = () => {
       icon: Briefcase,
       color: 'from-purple-500 to-purple-600',
       description: 'Gestionar servicios ofrecidos',
+      path: '/admin/services',
       comingSoon: false,
     },
     {
@@ -53,6 +59,7 @@ export const Dashboard = () => {
       icon: Building,
       color: 'from-green-500 to-green-600',
       description: 'Administrar proyectos y galerías',
+      path: '/admin/projects',
       comingSoon: false,
     },
     {
@@ -60,6 +67,7 @@ export const Dashboard = () => {
       icon: MessageSquare,
       color: 'from-yellow-500 to-yellow-600',
       description: 'Ver mensajes de contacto',
+      path: '/admin/messages',
       comingSoon: false,
     },
     {
@@ -67,6 +75,7 @@ export const Dashboard = () => {
       icon: Image,
       color: 'from-pink-500 to-pink-600',
       description: 'Biblioteca de imágenes',
+      path: '',
       comingSoon: true,
     },
     {
@@ -74,6 +83,7 @@ export const Dashboard = () => {
       icon: Settings,
       color: 'from-gray-500 to-gray-600',
       description: 'Configuración del sitio',
+      path: '',
       comingSoon: true,
     },
   ];
@@ -184,13 +194,15 @@ export const Dashboard = () => {
           {adminSections.map((section, index) => {
             const Icon = section.icon;
             return (
-              <motion.div
+              <motion.button
                 key={section.title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
-                className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 ${
-                  section.comingSoon ? 'opacity-60' : 'cursor-pointer hover:-translate-y-2'
+                onClick={() => !section.comingSoon && handleNavigate(section.path)}
+                disabled={section.comingSoon}
+                className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 text-left w-full ${
+                  section.comingSoon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-2'
                 }`}
               >
                 <div className={`h-2 bg-gradient-to-r ${section.color}`} />
@@ -210,13 +222,13 @@ export const Dashboard = () => {
 
                   {!section.comingSoon && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
-                      <button className="text-primary font-semibold text-sm hover:underline">
+                      <span className="text-primary font-semibold text-sm hover:underline">
                         Administrar →
-                      </button>
+                      </span>
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </motion.button>
             );
           })}
         </div>
