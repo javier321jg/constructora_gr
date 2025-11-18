@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, HardHat, Home, Warehouse, Wrench, Ruler } from 'lucide-react';
+import { Building2, HardHat, Home, Warehouse, Wrench, Ruler, ArrowRight } from 'lucide-react';
 import { useScrollAnimation } from '../../hooks/useScrollAnimation';
-import { contentApi } from '../../services/api';
+import { useServices } from '../../hooks/useApiQueries';
 import { Service } from '../../types';
 
 const iconMap: Record<string, any> = {
@@ -16,23 +15,7 @@ const iconMap: Record<string, any> = {
 
 export const Services = () => {
   const { ref, isVisible } = useScrollAnimation(0.2);
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const response = await contentApi.getServices(false);
-        setServices(response.data);
-      } catch (error) {
-        console.error('Error loading services:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchServices();
-  }, []);
+  const { data: services = [], isLoading } = useServices(false);
 
   // Servicios por defecto si no hay en la base de datos
   const defaultServices = [
@@ -75,7 +58,7 @@ export const Services = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2,
+        staggerChildren: 0.15,
       },
     },
   };
@@ -92,13 +75,13 @@ export const Services = () => {
     },
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <section id="servicios" className="section-padding bg-gray-50">
-        <div className="container-custom">
+      <section id="services" className="section-padding bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="card shimmer h-64" />
+              <div key={i} className="card shimmer h-72" />
             ))}
           </div>
         </div>
@@ -107,19 +90,32 @@ export const Services = () => {
   }
 
   return (
-    <section id="servicios" className="section-padding bg-gray-50" ref={ref}>
-      <div className="container-custom">
+    <section id="services" className="section-padding bg-gradient-to-b from-gray-50 to-white relative overflow-hidden" ref={ref}>
+      {/* Decorative background elements */}
+      <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -30 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <h2 className="section-title">
-            Nuestros <span className="text-primary">Servicios</span>
+          <motion.div
+            className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-6"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+            transition={{ delay: 0.1 }}
+          >
+            <span className="text-primary font-semibold text-sm">Nuestras Soluciones</span>
+          </motion.div>
+
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-dark">
+            Servicios <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Profesionales</span>
           </h2>
-          <p className="section-subtitle">
-            Ofrecemos soluciones integrales de construcción para proyectos de cualquier escala
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Ofrecemos soluciones integrales de construcción de clase mundial para proyectos de cualquier escala
           </p>
         </motion.div>
 
@@ -136,63 +132,53 @@ export const Services = () => {
               <motion.div
                 key={service.id}
                 variants={cardVariants}
-                className="group relative"
+                className="group relative h-full"
               >
-                <div
-                  className="card h-full relative overflow-hidden cursor-pointer"
-                  style={{ borderTop: `4px solid ${service.color}` }}
-                >
-                  {/* Fondo animado */}
+                <div className="bg-white rounded-2xl p-8 h-full shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 relative overflow-hidden">
+                  {/* Gradient background on hover */}
                   <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300"
+                    className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300"
                     style={{ background: service.color }}
                   />
 
-                  {/* Icono con animación 3D */}
-                  <div className="mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                    <div
-                      className="w-16 h-16 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: `${service.color}20` }}
+                  {/* Icon container */}
+                  <div className="mb-8 relative z-10">
+                    <motion.div
+                      className="inline-flex p-4 rounded-xl"
+                      style={{ backgroundColor: `${service.color}15` }}
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                     >
                       <Icon
-                        size={32}
+                        size={40}
                         style={{ color: service.color }}
-                        className="transform group-hover:rotate-12 transition-transform duration-300"
                       />
-                    </div>
+                    </motion.div>
                   </div>
 
-                  {/* Contenido */}
-                  <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+                  {/* Content */}
+                  <h3 className="text-2xl font-bold mb-3 text-dark group-hover:text-primary transition-colors duration-300 relative z-10">
                     {service.name}
                   </h3>
 
-                  <p className="text-gray-600 mb-4 line-clamp-3">
+                  <p className="text-gray-600 mb-6 line-clamp-3 relative z-10">
                     {service.short_description}
                   </p>
 
-                  {/* Botón hover */}
-                  <div className="mt-auto pt-4 border-t border-gray-200 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                    <span className="text-primary font-semibold flex items-center">
-                      Ver más
-                      <svg
-                        className="w-4 h-4 ml-2 transform group-hover:translate-x-2 transition-transform"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </span>
-                  </div>
+                  {/* CTA */}
+                  <motion.div
+                    className="mt-auto flex items-center text-primary font-semibold group-hover:translate-x-2 transition-transform duration-300 relative z-10"
+                    whileHover={{ x: 4 }}
+                  >
+                    <span>Conocer más</span>
+                    <ArrowRight size={18} className="ml-2" />
+                  </motion.div>
 
-                  {/* Efecto de brillo */}
-                  <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 group-hover:left-full transition-all duration-700" />
+                  {/* Accent border */}
+                  <div
+                    className="absolute top-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500"
+                    style={{ background: `linear-gradient(to right, ${service.color}, transparent)` }}
+                  />
                 </div>
               </motion.div>
             );
