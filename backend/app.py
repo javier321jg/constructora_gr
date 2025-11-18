@@ -17,6 +17,8 @@ def create_app():
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+    app.config['JWT_ALGORITHM'] = 'HS256'
+    app.config['JWT_DECODE_ALGORITHMS'] = ['HS256']
 
     # Configuración de base de datos
     # Usar ruta absoluta para compatibilidad con Windows
