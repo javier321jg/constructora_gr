@@ -1,31 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Calendar, X } from 'lucide-react';
+import { MapPin, Calendar, X, Award, ArrowRight } from 'lucide-react';
 import { useScrollAnimation } from '../../hooks/useScrollAnimation';
-import { contentApi } from '../../services/api';
+import { useProjects } from '../../hooks/useApiQueries';
+import { LazyImage } from '../shared/LazyImage';
 import { Project } from '../../types';
 
 export const Projects = () => {
   const { ref, isVisible } = useScrollAnimation(0.2);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { data: projects = [], isLoading } = useProjects();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await contentApi.getProjects();
-        setProjects(response.data);
-      } catch (error) {
-        console.error('Error loading projects:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
-  }, []);
 
   const categories = ['Todos', 'Residencial', 'Comercial', 'Industrial'];
 
@@ -54,13 +39,13 @@ export const Projects = () => {
     },
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <section id="proyectos" className="section-padding bg-white">
-        <div className="container-custom">
+      <section className="section-padding bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="shimmer h-80 rounded-xl" />
+              <div key={i} className="shimmer h-80 rounded-2xl" />
             ))}
           </div>
         </div>
@@ -69,45 +54,63 @@ export const Projects = () => {
   }
 
   return (
-    <section id="proyectos" className="section-padding bg-white" ref={ref}>
-      <div className="container-custom">
+    <section className="section-padding bg-gradient-to-b from-white to-gray-50 relative overflow-hidden" ref={ref}>
+      {/* Decorative elements */}
+      <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -30 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <h2 className="section-title">
-            Nuestros <span className="text-primary">Proyectos</span>
+          <motion.div
+            className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-6"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+            transition={{ delay: 0.1 }}
+          >
+            <span className="text-primary font-semibold text-sm">Portfolio de Proyectos</span>
+          </motion.div>
+
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-dark">
+            Proyectos <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Destacados</span>
           </h2>
-          <p className="section-subtitle">
-            Descubre nuestra trayectoria a través de proyectos exitosos
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Descubre nuestra trayectoria a través de proyectos exitosos que transforman espacios
           </p>
         </motion.div>
 
-        {/* Filtros */}
+        {/* Category Filters */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={isVisible ? { opacity: 1 } : {}}
-          transition={{ delay: 0.3 }}
-          className="flex flex-wrap justify-center gap-4 mb-12"
+          transition={{ delay: 0.2 }}
+          className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-16"
         >
-          {categories.map((category) => (
-            <button
+          {categories.map((category, index) => (
+            <motion.button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+              className={`px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-300 text-sm sm:text-base ${
                 selectedCategory === category
-                  ? 'bg-primary text-white shadow-lg scale-105'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg'
+                  : 'bg-white text-gray-700 border border-gray-200 hover:border-primary hover:text-primary'
               }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={isVisible ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.3 + index * 0.1 }}
             >
               {category}
-            </button>
+            </motion.button>
           ))}
         </motion.div>
 
-        {/* Grid de proyectos */}
+        {/* Projects Grid */}
         <AnimatePresence mode="wait">
           <motion.div
             key={selectedCategory}
@@ -116,65 +119,100 @@ export const Projects = () => {
             initial="hidden"
             animate="visible"
           >
-            {filteredProjects.map((project) => (
+            {filteredProjects.map((project, index) => (
               <motion.div
                 key={project.id}
                 variants={cardVariants}
                 layout
-                className="group cursor-pointer"
+                className="group cursor-pointer h-full"
                 onClick={() => setSelectedProject(project)}
+                whileHover={{ y: -8 }}
               >
-                <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 h-80">
-                  {/* Imagen */}
-                  <div className="absolute inset-0">
+                <div className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 h-96 bg-white border border-gray-200">
+                  {/* Image Container */}
+                  <div className="absolute inset-0 overflow-hidden">
                     {project.main_image ? (
-                      <img
+                      <LazyImage
                         src={project.main_image}
                         alt={project.name}
-                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                        <span className="text-white text-6xl font-bold opacity-20">
-                          {project.name.charAt(0)}
-                        </span>
+                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                        <Award size={80} className="text-primary/30" />
                       </div>
                     )}
                   </div>
 
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                  {/* Contenido */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <div className="mb-2">
-                      <span className="inline-block bg-primary px-3 py-1 rounded-full text-xs font-semibold">
+                  {/* Featured Badge */}
+                  {project.is_featured && (
+                    <motion.div
+                      className="absolute top-4 right-4 z-20"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <div className="bg-gradient-to-r from-accent to-primary text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-1">
+                        <Award size={14} />
+                        Destacado
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    {/* Category Badge */}
+                    <motion.div
+                      className="mb-4 inline-block"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <span className="bg-primary/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold">
                         {project.category}
                       </span>
-                    </div>
+                    </motion.div>
 
-                    <h3 className="text-2xl font-bold mb-2">{project.name}</h3>
+                    {/* Title */}
+                    <h3 className="text-2xl font-bold mb-3 group-hover:text-accent transition-colors duration-300">
+                      {project.name}
+                    </h3>
 
+                    {/* Location */}
                     {project.location && (
-                      <div className="flex items-center text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-                        <MapPin size={16} className="mr-1" />
-                        <span>{project.location}</span>
-                      </div>
+                      <motion.div
+                        className="flex items-center text-sm mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                      >
+                        <MapPin size={16} className="mr-2 flex-shrink-0" />
+                        <span className="line-clamp-1">{project.location}</span>
+                      </motion.div>
                     )}
 
-                    <p className="text-sm mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200 line-clamp-2">
+                    {/* Description */}
+                    <motion.p
+                      className="text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                    >
                       {project.description}
-                    </p>
-                  </div>
+                    </motion.p>
 
-                  {/* Badge de destacado */}
-                  {project.is_featured && (
-                    <div className="absolute top-4 right-4">
-                      <span className="bg-accent text-dark px-3 py-1 rounded-full text-xs font-bold">
-                        Destacado
-                      </span>
-                    </div>
-                  )}
+                    {/* CTA */}
+                    <motion.div
+                      className="mt-4 flex items-center text-accent font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                    >
+                      <span>Ver detalles</span>
+                      <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform" />
+                    </motion.div>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -272,17 +310,27 @@ export const Projects = () => {
                     {selectedProject.description}
                   </p>
 
-                  {/* Galería de imágenes */}
+                  {/* Image Gallery */}
                   {selectedProject.images && selectedProject.images.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {selectedProject.images.map((image) => (
-                        <img
-                          key={image.id}
-                          src={image.image_url}
-                          alt={image.caption || selectedProject.name}
-                          className="w-full h-40 object-cover rounded-lg hover:scale-105 transition-transform duration-300"
-                        />
-                      ))}
+                    <div>
+                      <h3 className="text-2xl font-bold mb-6">Galería de Imágenes</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {selectedProject.images.map((image, idx) => (
+                          <motion.div
+                            key={image.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className="overflow-hidden rounded-lg"
+                          >
+                            <LazyImage
+                              src={image.image_url}
+                              alt={image.caption || selectedProject.name}
+                              className="w-full h-40 object-cover hover:scale-110 transition-transform duration-300 cursor-zoom-in"
+                            />
+                          </motion.div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

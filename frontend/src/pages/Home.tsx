@@ -11,13 +11,19 @@ export const Home = () => {
     <div className="min-h-screen">
       <Navbar />
       <main>
-        <div id="inicio">
-          <Hero />
+        <Hero />
+        <div id="services">
+          <Services />
         </div>
-        <Services />
-        <Projects />
-        <About />
-        <Contact />
+        <div id="projects">
+          <Projects />
+        </div>
+        <div id="about">
+          <About />
+        </div>
+        <div id="contact">
+          <Contact />
+        </div>
       </main>
       <Footer />
     </div>
